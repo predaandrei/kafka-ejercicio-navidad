@@ -1,0 +1,57 @@
+services:
+  kafka1:
+    image: bitnami/kafka:3.7
+    container_name: kafka1
+    restart: unless-stopped
+    networks:
+      - kafka-net
+    ports:
+      - "9092:9092"
+    volumes:
+      - "./data/kafka1-data:/bitnami"
+    environment:
+      KAFKA_CFG_NODE_ID: 1
+      KAFKA_KRAFT_CLUSTER_ID: kraft-cluster-id
+      KAFKA_CFG_PROCESS_ROLES: controller, broker
+      KAFKA_CFG_LISTENERS: INTERNAL://:29092,EXTERNAL://:9092,CONTROLLER://:9093
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka1:9093,2@kafka2:9094
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_ADVERTISED_LISTENERS: INTERNAL://kafka1:29092,EXTERNAL://localhost:9092
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+
+  kafka2:
+    image: bitnami/kafka:3.7
+    container_name: kafka2
+    restart: unless-stopped
+    networks:
+      - kafka-net
+    ports:
+      - "9093:9093"
+    volumes:
+      - "./data/kafka2-data:/bitnami"
+    environment:
+      KAFKA_CFG_NODE_ID: 2
+      KAFKA_KRAFT_CLUSTER_ID: kraft-cluster-id
+      KAFKA_CFG_PROCESS_ROLES: controller, broker
+      KAFKA_CFG_LISTENERS: INTERNAL://:29093,EXTERNAL://:9093,CONTROLLER://:9094
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka1:9093,2@kafka2:9094
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_ADVERTISED_LISTENERS: INTERNAL://kafka2:29093,EXTERNAL://localhost:9093
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR: 2
+      KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+
+networks:
+  kafka-net:
+    name: kafka-net
+    driver: bridge
